@@ -14,14 +14,14 @@ export const AuthProvider = ({ children }) => {
       if (user) {
         try {
           const res = await getDoc(doc(db, "users", user.uid));
-          if (user.exist()) {
+          if (res.exist()) {
             setUser({ id: res.id, ...res.data() });
           } else {
             setUser(null);
           }
         } catch (err) {
           setUser(null);
-          console.log(err);
+          console.log("Error fetching user data: ", err);
         }
       } else {
         setUser(null);
@@ -30,7 +30,11 @@ export const AuthProvider = ({ children }) => {
     });
 
     return () => unsubscribe();
-  });
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <AuthContext.Provider
