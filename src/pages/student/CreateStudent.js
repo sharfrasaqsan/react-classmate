@@ -1,6 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { timestamp } from "../../firebase/Config";
+import { auth } from "../../firebase/Config";
+import { db } from "../../firebase/Config";
+import { setDoc, doc } from "firebase/firestore";
+import { useData } from "../../contexts/DataContext";
+import { useAuth } from "../../contexts/AuthContext";
 
 const CreateStudent = () => {
+  const { user } = useAuth();
+  const { setStudents, navigate } = useData();
+
   const [studentRegNo, setStudentRegNo] = useState("");
   const [firstname, setFirstname] = useState("");
   const [middlename, setMiddlename] = useState("");
@@ -14,15 +24,51 @@ const CreateStudent = () => {
   const [photo, setPhoto] = useState("");
   const [fatherName, setFatherName] = useState("");
   const [fatherPhone, setFatherPhone] = useState("");
-  const [classRoom, setClassRoom] = useState("");
+  const [grade, setGrade] = useState("");
   const [emergencyName, setEmergencyName] = useState(fatherName);
   const [emergencyPhone, setEmergencyPhone] = useState(fatherPhone);
+  const [admissionDate, setAdmissionDate] = useState("");
 
   const [createLoading, setCreateLoading] = useState(false);
+
+  useEffect(() => {
+    setEmergencyName(fatherName);
+    setEmergencyPhone(fatherPhone);
+  }, [fatherName, fatherPhone]);
 
   const handleCreate = async () => {
     try {
       setCreateLoading(true);
+      const userCredentials = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const { uid } = userCredentials.user;
+      const newStudent = {
+        id: uid,
+        studentRegNo,
+        firstname,
+        middlename,
+        lastname,
+        email,
+        gender,
+        dateOfBirth,
+        address,
+        phone,
+        photo,
+        fatherName,
+        fatherPhone,
+        grade,
+        emergencyName,
+        emergencyPhone,
+        role: "student",
+        status: "active",
+        createdAt: timestamp(),
+      };
+      await setDoc(doc(db, "students", uid), newStudent);
+      setStudents((prev) => [...prev, newStudent]);
+      navigate("/student-dashboard");
     } catch (err) {
       console.log(
         "Error creating student: ",
@@ -40,7 +86,12 @@ const CreateStudent = () => {
     <section>
       <h2>Create Student</h2>
       <div>
-        <form>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleCreate();
+          }}
+        >
           <div>
             <label htmlFor="photo">
               <img
@@ -61,7 +112,7 @@ const CreateStudent = () => {
                 name="photo"
                 id="photo"
                 accept="image/*"
-                onChange={(e) => setPhoto(e.target.value)}
+                onChange={(e) => setPhoto(e.target.files[0])}
                 required
                 style={{ display: "none" }}
               />
@@ -249,8 +300,8 @@ const CreateStudent = () => {
             <label htmlFor="fatherphone">Father Phone Number *</label>
             <input
               type="text"
-              name="fatherphone"
-              id="fatherphone"
+              name="fatherPhone"
+              id="fatherPhone"
               placeholder="Enter father phone number"
               value={fatherPhone}
               onChange={(e) => setFatherPhone(e.target.value)}
@@ -260,14 +311,14 @@ const CreateStudent = () => {
           </div>
 
           <div>
-            <label htmlFor="class">Class Name *</label>
+            <label htmlFor="grade">Grade *</label>
             <input
               type="text"
-              name="class"
-              id="class"
-              placeholder="Enter class name"
-              value={classRoom}
-              onChange={(e) => setClassRoom(e.target.value)}
+              name="grade"
+              id="grade"
+              placeholder="Enter grade"
+              value={grade}
+              onChange={(e) => setGrade(e.target.value)}
               autoComplete="off"
               required
             />
@@ -277,8 +328,8 @@ const CreateStudent = () => {
             <label htmlFor="emergencyname">Emergency Person Name *</label>
             <input
               type="text"
-              name="emergencyname"
-              id="emergencyname"
+              name="emergencyName"
+              id="emergencyName"
               placeholder="Enter emergency person name"
               value={emergencyName}
               onChange={(e) => setEmergencyName(e.target.value)}
@@ -303,7 +354,23 @@ const CreateStudent = () => {
             />
           </div>
 
-          <button type="submit">Create Student Account</button>
+          <div>
+            <label htmlFor="admissiondate">Admission Date *</label>
+            <input
+              type="date"
+              name="admissiondate"
+              id="admissiondate"
+              placeholder="Enter admission date"
+              value={admissionDate}
+              onChange={(e) => setAdmissionDate(e.target.value)}
+              autoComplete="off"
+              required
+            />
+          </div>
+
+          <button type="submit">
+            {createLoading ? "Creating..." : "Create Student Profile"}
+          </button>
         </form>
       </div>
     </section>
