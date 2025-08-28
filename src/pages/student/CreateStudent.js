@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { timestamp } from "../../firebase/Config";
-import { auth } from "../../firebase/Config";
-import { db } from "../../firebase/Config";
-import { setDoc, doc } from "firebase/firestore";
+import { auth, db } from "../../firebase/Config";
+import { setDoc, doc, serverTimestamp } from "firebase/firestore";
 import { useData } from "../../contexts/DataContext";
 import { useAuth } from "../../contexts/AuthContext";
 
@@ -64,7 +62,8 @@ const CreateStudent = () => {
         emergencyPhone,
         role: "student",
         status: "active",
-        createdAt: timestamp(),
+        admissionDate,
+        createdAt: serverTimestamp(),
       };
       await setDoc(doc(db, "students", uid), newStudent);
       setStudents((prev) => [...prev, newStudent]);
