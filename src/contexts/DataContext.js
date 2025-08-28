@@ -1,6 +1,7 @@
 import { collection, getDocs } from "firebase/firestore";
 import { createContext, useContext, useEffect, useState } from "react";
 import { db } from "../firebase/Config";
+import { useNavigate } from "react-router-dom";
 
 const DataContext = createContext();
 
@@ -10,6 +11,7 @@ export const DataProvider = ({ children }) => {
   const [students, setStudents] = useState([]);
 
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchAdmins = async () => {
@@ -96,6 +98,7 @@ export const DataProvider = ({ children }) => {
         teachers,
         students,
         loading,
+        navigate,
       }}
     >
       {children}
