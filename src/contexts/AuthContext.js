@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { onAuthStateChanged, getDoc, doc } from "firebase/auth";
+import { onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "../firebase/Config";
+import { getDoc, doc } from "firebase/firestore";
 
 const AuthContext = createContext();
 
@@ -12,11 +13,21 @@ export const AuthProvider = ({ children }) => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         try {
-          const res = await getDoc(doc(db, "users", user.uid));
-          if (res.exist()) {
-            setUser({ id: res.id, ...res.data() });
+          let res = await getDoc(doc(db, "admins", user.uid)); // try to get admin
+          if (res.exists()) {
+            setUser({ id: res.id, role: "admin", ...res.data() });
           } else {
-            setUser(null);
+            res = await getDoc(doc(db, "teachers", user.uid)); // try to get teacher
+            if (res.exists()) {
+              setUser({ id: res.id, role: "teacher", ...res.data() });
+            } else {
+              res = await getDoc(doc(db, "students", user.uid)); // try to get student
+              if (res.exists()) {
+                setUser({ id: res.id, role: "student", ...res.data() });
+              } else {
+                setUser(null); // not found in any collection
+              }
+            }
           }
         } catch (err) {
           setUser(null);
