@@ -4,6 +4,7 @@ import { auth, db } from "../../firebase/Config";
 import { setDoc, doc, serverTimestamp } from "firebase/firestore";
 import { useData } from "../../contexts/DataContext";
 import { useAuth } from "../../contexts/AuthContext";
+import { toast } from "sonner";
 
 const CreateStudent = () => {
   const { user } = useAuth();
@@ -67,6 +68,7 @@ const CreateStudent = () => {
       };
       await setDoc(doc(db, "students", uid), newStudent);
       setStudents((prev) => [...prev, newStudent]);
+      toast.success("Student created successfully");
       navigate("/student-dashboard");
     } catch (err) {
       console.log(
@@ -75,6 +77,7 @@ const CreateStudent = () => {
         "Error message: ",
         err.message
       );
+      toast.error("Error creating student");
       setCreateLoading(false);
     } finally {
       setCreateLoading(false);
@@ -367,7 +370,7 @@ const CreateStudent = () => {
             />
           </div>
 
-          <button type="submit">
+          <button type="submit" onClick={() => toast.loading("Creating...")}>
             {createLoading ? "Creating..." : "Create Student Profile"}
           </button>
         </form>

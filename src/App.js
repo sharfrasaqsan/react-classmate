@@ -17,6 +17,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import Login from "./pages/Login";
 
 import ProtectedRoute from "./utils/ProtectedRoute";
+import { Toaster } from "sonner";
 
 function App() {
   return (
@@ -93,6 +94,7 @@ function App() {
       </Routes>
 
       <Footer />
+      <Toaster />
     </div>
   );
 }
