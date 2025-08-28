@@ -16,7 +16,7 @@ export const DataProvider = ({ children }) => {
       try {
         setLoading(true);
         const res = await getDocs(collection(db, "admins"));
-        const resData = res.docs.map((doc) => ({
+        const resData = res.docs?.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
@@ -42,7 +42,7 @@ export const DataProvider = ({ children }) => {
       try {
         setLoading(true);
         const res = await getDocs(collection(db, "teachers"));
-        const resData = res.docs.map((doc) => ({
+        const resData = res.docs?.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
@@ -68,7 +68,7 @@ export const DataProvider = ({ children }) => {
       try {
         setLoading(true);
         const res = await getDocs(collection(db, "students"));
-        const resData = res.docs.map((doc) => ({
+        const resData = res.docs?.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));

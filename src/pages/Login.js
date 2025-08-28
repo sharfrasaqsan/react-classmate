@@ -1,13 +1,30 @@
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { useState } from "react";
+import { auth, db } from "../firebase/Config";
+import { useAuth } from "../contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
+  const { setUser } = useAuth();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleLogin = () => {
+  const navigate = useNavigate();
+  const [loginLoading, setLoginLoading] = useState(false);
+
+  const handleLogin = async () => {
     try {
+      setLoginLoading(true);
+      const userCredentials = signInWithEmailAndPassword(auth, email, password);
+      const user = userCredentials.user;
+      setUser(user);
+      navigate("/");
     } catch (err) {
-      console("Error logging in: ", err, "Error message: ", err.message);
+      console.log("Error logging in: ", err, "Error message: ", err.message);
+      setLoginLoading(false);
+    } finally {
+      setLoginLoading(false);
     }
   };
 
@@ -15,7 +32,12 @@ const Login = () => {
     <section>
       <h2>Login</h2>
       <div>
-        <form>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleLogin();
+          }}
+        >
           <div>
             <label htmlFor="email">Email</label>
             <input
@@ -43,7 +65,9 @@ const Login = () => {
             />
           </div>
 
-          <button type="submit">Login</button>
+          <button type="submit" disabled={loginLoading}>
+            {loginLoading ? "Logging in..." : "Login"}
+          </button>
         </form>
       </div>
     </section>
